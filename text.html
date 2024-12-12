@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyStream</title>
+    <link href="https://vjs.zencdn.net/8.0.4/video-js.css" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #f4f4f4;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: #1f1f1f;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        header img {
+            width: 30px;
+            height: 30px;
+        }
+
+        .search-bar {
+            display: flex;
+            align-items: center;
+        }
+
+        .search-bar input {
+            padding: 6px;
+            border: 1px solid #333;
+            border-radius: 20px;
+            outline: none;
+            font-size: 0.9em;
+            background-color: #1f1f1f;
+            color: #f4f4f4;
+        }
+
+        .search-bar button {
+            padding: 6px 10px;
+            margin-left: 8px;
+            background-color: #333;
+            color: #f4f4f4;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .search-bar button:hover {
+            background-color: #555;
+        }
+
+        .movies {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .movie {
+            background: #1f1f1f;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .movie:hover {
+            transform: scale(1.03);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7);
+        }
+
+        .movie img {
+            width: 100%;
+            height: auto;
+        }
+
+        .movie h2 {
+            margin: 10px;
+            font-size: 1em;
+            color: #f4f4f4;
+            text-align: center;
+        }
+
+        .watch-btn {
+            display: block;
+            padding: 8px;
+            margin: 10px auto;
+            background-color: #333;
+            color: #f4f4f4;
+            text-align: center;
+            border-radius: 20px;
+            text-decoration: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            border: none;
+        }
+
+        .watch-btn:hover {
+            background-color: #555;
+        }
+
+        #videoModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        #videoModal .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: #f4f4f4;
+            cursor: pointer;
+        }
+
+        #videoPlayer {
+            width: 80%;
+            max-width: 1000px;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <img src="https://cdn-icons-png.flaticon.com/512/0/375.png" alt="Logo">
+        <div class="search-bar">
+            <input type="text" id="search" placeholder="Rechercher un film">
+            <button onclick="searchMovies()">Rechercher</button>
+        </div>
+    </header>
+
+    <div class="movies" id="moviesList">
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/bHjLC5GuBfeyW6ZE07x6TalKj19.jpg" alt="Affiche de Karaté Kid">
+            <h2>Karaté Kid</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/jb0x9qk13yag_n/master.m3u8?t=dcPYGbOivIF81RWUf0ppH3hbMQrPUUgtsF8kq5Wv9W0&s=1733951354&e=43200&f=25153&i=0.0&sp=0')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BMjM3MjQ1MzkxNl5BMl5BanBnXkFtZTgwODk1ODgyMjI@._V1_FMjpg_UX1000_.jpg" alt="Baby Driver">
+            <h2>Baby Driver</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00002/4elb2qll0o1w_n/master.m3u8?t=PamoAAB5D-Q0Ah0Hz69WzrwkscoKtfP-ID4oWENb8sg&s=1733951397&e=43200&f=11922&i=0.0&sp=0')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://m.media-amazon.com/images/M/MV5BYzYyN2FiZmUtYWYzMy00MzViLWJkZTMtOGY1ZjgzNWMwN2YxXkEyXkFqcGc@._V1_FMjpg_UX1000_.jpg" alt="Titanic">
+            <h2>Titanic</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/04/00000/pv1qaztp9gjy_o/master.m3u8?t=Rvp1TMQTYJCw5Gu_kVsi_hfMfkrbh1f89cTCxyCmF5s&s=1733951475&e=43200&f=4251&i=0.0&sp=0')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://fr.web.img3.acsta.net/medias/nmedia/18/35/32/48/18384546.jpg" alt="Affiche de N'oublie jamais">
+            <h2>N'oublie jamais</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/04/00000/,sxqyseqce6sr_n,lang/eng/sxqyseqce6sr_eng,lang/fre/sxqyseqce6sr_fre,.urlset/master.m3u8?t=aZliYNHUVyRsSwGxULbgcel-yPJ5I7iQHV1l8ap5_8U&s=1733951627&e=43200&f=4440&i=0.0&sp=0&fr=sxqyseqce6sr')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/vuza0WqY239yBXOadKlGwJsZJFE.jpg" alt="Affiche de The Truman Show">
+            <h2>The Truman Show</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/,dtt3ecgzmiid_n,lang/eng/dtt3ecgzmiid_eng,lang/fre/dtt3ecgzmiid_fre,.urlset/master.m3u8?t=VjUwFbMfbXLDWw_KvMfOqdyyPDbk1UXjy-Z_FqibQy4&s=1733951702&e=43200&f=9556&i=0.0&sp=0&fr=dtt3ecgzmiid')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg" alt="Affiche de Forrest Gump">
+            <h2>Forrest Gump</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/,7yo4pa3207qd_n,lang/eng/7yo4pa3207qd_eng,lang/fre/7yo4pa3207qd_fre,.urlset/master.m3u8?t=iWjCmP123ET1I6R-DMPa3_EXtiSPuf7lPw61sR4ARBM&s=1733951793&e=43200&f=6787&i=0.0&sp=0&fr=7yo4pa3207qd')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/t1i10ptOivG4hV7erkX3tmKpiqm.jpg" alt="Affiche de Fight Club">
+            <h2>Fight Club</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/,lzr7zckz0dqb_n,lang/eng/lzr7zckz0dqb_eng,lang/fre/lzr7zckz0dqb_fre,.urlset/master.m3u8?t=0lNRKWhfVVxJq4Ba8ckCbsLghfyurQPrhR0i4n_1hRU&s=1733951840&e=43200&f=25303&i=0.0&sp=0&fr=lzr7zckz0dqb')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" alt="Affiche de Interstellar">
+            <h2>Interstellar</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/04/00000/z1z459jn60rq_n/master.m3u8?t=kP-dzS7mCkoLD5BlJjn_pZXG-0FQWCrG0YFLVBigZMQ&s=1733952032&e=43200&f=4932&i=0.0&sp=0')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/S2w6manFJTMiq0RdgMacSN3nee.jpg" alt="Affiche de Arrête-moi si tu peux">
+            <h2>Arrête-moi si tu peux</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/b5mfpx4egqoj_n/master.m3u8?t=gzOfsh4GM1d5yCnmPxAN6NjKavo9LDwu-ctYts_gMMk&s=1733952086&e=43200&f=25461&i=0.0&sp=0')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/oEoVMLxQAgWlX0IUVty8orD7DrQ.jpg" alt="Affiche de À la recherche du bonheur">
+            <h2>À la recherche du bonheur</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/,haddgnxj00ek_n,lang/eng/haddgnxj00ek_eng,lang/fre/haddgnxj00ek_fre,.urlset/master.m3u8?t=hLjaIQOcTMTYKICkTtpeSYjJ8VQnp7VfgkLgREY4Mms&s=1733951171&e=43200&f=25182&i=0.0&sp=0&fr=haddgnxj00ek')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/5weKu49pzJCt06OPpjvT80efnQj.jpg" alt="Affiche de Spider-Man : No Way Home">
+            <h2>Spider-Man : No Way Home</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/03/00000/,237sze52na4n_n,lang/fre/237sze52na4n_fre,.urlset/master.m3u8?t=4gr3r1EMCX-_DgJYMBbY212MBAm2QcDPCkRmqh3H3r8&s=1733960252&e=43200&f=3448&i=0.0&sp=0&fr=237sze52na4n')">Regarder</button>
+        </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg" alt="Affiche de Pulp Fictione">
+            <h2>Pulp Fiction</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/s9lq8edtibiz_n/master.m3u8?t=2N17r_uxPu3G4NJNx34YpnmbVEUMIbv5H7Vt0xAtyTs&s=1733960480&e=43200&f=6792&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/oUhq9FG0nKUs2DtPVGR1b0q2RCT.jpg" alt="Affiche de Babysitting">
+            <h2>Babysitting</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/ecl7mmalyb7j_n/master.m3u8?t=5Yqwm7ViS4dW9ixPC_Mr_wa_hduHQOk6_pExagdt6sY&s=1733960613&e=43200&f=8108&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg" alt="Affiche de Batman : The Dark Knight">
+            <h2>Batman : The Dark Knight</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/,6bfrdl0nzror_n,lang/fre/6bfrdl0nzror_fre,.urlset/master.m3u8?t=3050Nnx82TKFhQX-4E3HEwUtElWuiyf9YktP-bFO4ss&s=1733960693&e=43200&f=5898&i=0.0&sp=0&fr=6bfrdl0nzror')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/egw9RD6mm1qIcWuVcmcIhs7qkd1.jpg" alt="Affiche de Bird Box">
+            <h2>Bird Box</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00002/,glqbc254gn1j_n,lang/fre/glqbc254gn1j_fre,.urlset/master.m3u8?t=0NwFWoTEhtN5OQUYkKN_04C1RkvBndfxzOrnigZR_FU&s=1733960942&e=43200&f=13101&i=0.0&sp=0&fr=glqbc254gn1j')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w300/dGOwVbGN5eJlgAnFwGRaANnyZMF.jpg" alt="Affiche de Very Bad Trip">
+            <h2>Very Bad Trip</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/g7hmz897b682_n/master.m3u8?t=DuHRFCB7Ws9bUCmHYoWo5yhaPKIkO56OoJdPotrtsPY&s=1733961004&e=43200&f=26147&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://i.imgup.lol/poster/XFVBGq3.jpg" alt="Affiche de Jumanji: Next Level">
+            <h2>Jumanji: Next Level</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/03/00000/,kihy0js18i7p_n,lang/fre/kihy0js18i7p_fre,.urlset/master.m3u8?t=LJbUxqCsyRYJS_7rtBPkWGEwUmfWiP0jU81gNnJ7L90&s=1733961163&e=43200&f=3372&i=0.0&sp=0&fr=kihy0js18i7p')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/1SWBSYJsnyhdNRfLI1T6RsCxAQ4.jpg" alt="Affiche de World War Z">
+            <h2>World War Z</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00002/,m11dki77tddb_n,lang/fre/m11dki77tddb_fre,.urlset/master.m3u8?t=Y40CsVBpt1RKaPHVfk9B3pwGql13fzScVH5RMiRpGkI&s=1733961247&e=43200&f=13110&i=0.0&sp=0&fr=m11dki77tddb')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg" alt="Affiche de Inception">
+            <h2>Inception</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/,d71l12hp5fih_n,lang/eng/1upt7cbxfdzr_eng,lang/fre/1upt7cbxfdzr_fre,.urlset/master.m3u8?t=44q4DYV0R36NvTegO7PF6cPQ-CfI_Ig-Qd68Q2bAMn4&s=1733961314&e=43200&f=9542&i=0.0&sp=0&fr=d71l12hp5fih')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/bMgq7VBriuBFknXEe9E9pVBYGZq.jpg" alt="Affiche de The Blind Side">
+            <h2>The Blind Side</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.oneupload.to/hls2/05/00048/c36rgghoo4co_,l,h,.urlset/master.m3u8?t=YktunIsgccscnJKXd60Y85z9-QJkTcAhr1Yy-x0VSyk&s=1733961679&e=28800&f=243357&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/cceVH3D1BsKJyHLKvKgc0Wa2m0.jpg" alt="Affiche de Nos étoiles contraires">
+            <h2>Nos étoiles contraires</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00004/,00a653mg6mzs_n,lang/fre/00a653mg6mzs_fre,.urlset/master.m3u8?t=IIsxqTAtimNObqkssdC6HZ0jzNELRgGcyp1HJkIQXjY&s=1733962217&e=43200&f=21794&i=0.0&sp=0&fr=00a653mg6mzs')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/rHRErXpF2AIhw6i4GD1ikqy8uak.jpg" alt="Affiche de Bad Boys: Ride or Die">
+            <h2>Bad Boys: Ride or Die</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/01/00000/e113378qtg6n_o/master.m3u8?t=dpFBy-nie8bGtg4ODrOUZk45H0tEb_UNdKTXUPaIlyM&s=1733962296&e=43200&f=1028&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/jBForKpzcUBTRBdPJs8IEyBjeir.jpg" alt="Affiche de Mr. & Mrs. Smith">
+            <h2>Mr. & Mrs. Smith</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/,4t0x3dqtnm1v_n,lang/eng/4t0x3dqtnm1v_eng,lang/fre/4t0x3dqtnm1v_fre,.urlset/master.m3u8?t=s4saU86cs1ikCmeonCVBFNFhwp-R21231C_i7WAAnIA&s=1733962373&e=43200&f=25306&i=0.0&sp=0&fr=4t0x3dqtnm1v')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/egBxj3ude84theXc3cLbBHrWOkQ.jpg" alt="Affiche de Taxi 1">
+            <h2>Taxi 1</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00001/,lqvaure5e8te_n,lang/eng/lqvaure5e8te_eng,lang/fre/lqvaure5e8te_fre,.urlset/master.m3u8?t=Bed4frm4Cq8kaP6lj2KKCG_yBBL3CudaxIcc9wN1HQc&s=1733962438&e=43200&f=7000&i=0.0&sp=0&fr=lqvaure5e8te')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg" alt="Affiche de Blade Runner 2049">
+            <h2>Blade Runner 2049</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00002/,cifgnt4gauwm_n,lang/fre/cifgnt4gauwm_fre,.urlset/master.m3u8?t=mjAKFYLwUapVbSmBmbwk0PYkXykzAwKgeaLQ6X-0PXE&s=1733962528&e=43200&f=11905&i=0.0&sp=0&fr=cifgnt4gauwm')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/8VG8fDNiy50H4FedGwdSVUPoaJe.jpg" alt="Affiche de La Ligne verte">
+            <h2>La Ligne verte</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.oneupload.to/hls2/04/00052/7eb81o0ubrxl_,l,h,.urlset/master.m3u8?t=z7SGdOVHHiy2Y6T5Zu9c8fuH52BwPjMHCn6XdPMkTrw&s=1733968191&e=28800&f=262410&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/lTVOquzxw2DPF3MKuYd1ynz9F6H.jpg" alt="Affiche de The Silence">
+            <h2>The Silence</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.oneupload.to/hls2/03/00052/btdmn2sb7wym_,l,h,.urlset/master.m3u8?t=-m7sHqhQAhej5yD5i8JWPLzV7f6dtV8qpMRJaOvqVLo&s=1733968345&e=28800&f=263690&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w300/nOd6vjEmzCT0k4VYqsA2hwyi87C.jpg" alt="Affiche de Requiem for a Dream">
+            <h2>Requiem for a Dream</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.oneupload.to/hls2/03/00047/d69cnkrugi8g_,l,h,.urlset/master.m3u8?t=FZhHa1mCQfLb5900JYOi5YOCoiRw7EqSXEfbMI9xkBc&s=1733968445&e=28800&f=238524&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/gma8o1jWa6m0K1iJ9TzHIiFyTtI.jpg" alt="Affiche de En plein vol">
+            <h2>En plein vol</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/04/00000/4t0rl3usmazo_n/master.m3u8?t=JN3-KVqShSL2gjPlbaFFrBOCNW3-D-pkwfhr1h7opD0&s=1733968536&e=43200&f=4706&i=0.0&sp=0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/rJHC1RUORuUhtfNb4Npclx0xnOf.jpg" alt="Affiche de Uncharted">
+            <h2>Uncharted</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/02/00000/,bkj45wvo1fs0_n,lang/fre/bkj45wvo1fs0_fre,.urlset/master.m3u8?t=aIhcJSGM_Ep5iIImXFrtam12KaC50_rWhQNN3I6735M&s=1733968606&e=43200&f=2762&i=0.0&sp=0&fr=bkj45wvo1fs0')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://fr.web.img4.acsta.net/c_310_420/pictures/20/03/31/09/22/0259222.jpg" alt="Affiche de Tyler Rake">
+            <h2>Tyler Rake</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/03/00000/,cu6zc0xbvbcd_n,lang/fre/cu6zc0xbvbcd_fre,.urlset/master.m3u8?t=rJ1BetnkCa6BpWrEiC_z2_O8mzQzNKIifxMAMufYvmY&s=1733968707&e=43200&f=3384&i=0.0&sp=0&fr=cu6zc0xbvbcd')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/dQIQZbJXn1pflQw3nwvXLJX0dHa.jpg" alt="Affiche de Le Loup de Wall Street">
+            <h2>Le Loup de Wall Street</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00004/,nj8yuqnedpr6_n,lang/fre/nj8yuqnedpr6_fre,.urlset/master.m3u8?t=UmrS6MFcX3lhWRN9L4EFVao_CZeOVMh0c3-VCI3Zyok&s=1733968785&e=43200&f=20366&i=0.0&sp=0&fr=nj8yuqnedpr6')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/h4X4tJFxJobAImCMekVZXUpJVJC.jpg" alt="Affiche de Seven">
+            <h2>Seven</h2>
+            <button class="watch-btn" onclick="playVideo("https://s1.fsvid.lol/hls2/01/00001/,t3y8yke6zeqt_n,lang/eng/t3y8yke6zeqt_eng,lang/fre/t3y8yke6zeqt_fre,.urlset/master.m3u8?t=JAhj54-Nym05qxDZCEUFAWcjBKPWQ-u6_599hfN2SeM&s=1733968857&e=43200&f=6794&i=0.0&sp=0&fr=t3y8yke6zeqt')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/fQ0vGVTtxjCdAJnxwPZ88O3Wzrh.jpg" alt="Affiche de Shutter Island">
+            <h2>Shutter Island</h2>
+            <button class="watch-btn" onclick="playVideo('https://s1.fsvid.lol/hls2/01/00005/,9d5qonq2ivjr_n,lang/eng/9d5qonq2ivjr_eng,lang/fre/9d5qonq2ivjr_fre,.urlset/master.m3u8?t=UR5jInvGpu5FQuC5m9F0pXGh7P4Z0yv1_cIMTxCozW8&s=1733968973&e=43200&f=25464&i=0.0&sp=0&fr=9d5qonq2ivjr')">Regarder</button>
+    </div>
+        <div class="movie">
+            <img src="https://image.tmdb.org/t/p/w500/xmbU4JTUm8rsdtn7Y3Fcm30GpeT.jpg" alt="Affiche de Free Guy">
+            <h2>Free Guy</h2>
+            <button class="watch-btn" onclick="playVideo('https://r1.fsvid.lol/hls2/02/00000/,iy031lq0kftg_n,lang/fre/iy031lq0kftg_fre,.urlset/master.m3u8?t=AZZ6bKUW6rNFbRnVpppEGxLudGiJwX8fKfUmTFSKcls&s=1733969180&e=43200&f=2852&i=0.0&sp=0&fr=iy031lq0kftg')">Regarder</button>
+    </div>
+
+
+    <div id="videoModal">
+        <span class="close" onclick="closeVideo()">&times;</span>
+        <video id="videoPlayer" class="video-js vjs-default-skin" controls preload="auto" data-setup='{"fluid": true}'></video>
+    </div>
+
+    <script src="https://vjs.zencdn.net/8.0.4/video.min.js"></script>
+    <script>
+        const videoModal = document.getElementById('videoModal');
+        const videoPlayer = videojs('videoPlayer');
+
+        function playVideo(src) {
+            if (src) {
+                videoPlayer.src({ src: src, type: "application/x-mpegURL" });
+                videoModal.style.display = 'flex';
+                videoPlayer.play();
+            } else {
+                alert("Veuillez ajouter un lien M3U8 valide !");
+            }
+        }
+
+        function closeVideo() {
+            videoModal.style.display = 'none';
+            videoPlayer.pause();
+            videoPlayer.reset();
+        }
+
+        function searchMovies() {
+            const query = document.getElementById('search').value.toLowerCase();
+            const movies = document.querySelectorAll('.movie');
+
+            movies.forEach(movie => {
+                const title = movie.querySelector('h2').innerText.toLowerCase();
+                if (title.includes(query)) {
+                    movie.style.display = '';
+                } else {
+                    movie.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
